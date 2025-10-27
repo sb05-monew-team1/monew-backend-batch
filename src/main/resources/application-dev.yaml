@@ -17,12 +17,12 @@ spring:
     init:
       mode: always
       continue-on-error: true
-      schema-locations: classpath:schema.sql, classpath:org/springframework/batch/core/schema-h2.sql
+      schema-locations: classpath:schema-h2.sql, classpath:org/springframework/batch/core/schema-h2.sql
       data-locations: classpath:data.sql
 
   batch:
     jdbc:
-      initialize-schema: never
+      initialize-schema: always
     job:
       enabled: false
 
