@@ -23,8 +23,7 @@ public class MonewBatchScheduler {
 	private final JobLauncher jobLauncher;
 	private final Job notificationDeleteJob;
 
-	// @Scheduled(cron = "0 0 1 * * *")
-	@Scheduled(initialDelay = 1000, fixedDelay = 5000)
+	@Scheduled(cron = "0 0 1 * * *")
 	public void runNotificationDeleteJob() {
 		try {
 			JobParameters jobParameters = new JobParametersBuilder()
