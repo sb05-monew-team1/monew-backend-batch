@@ -1,0 +1,51 @@
+package com.codeit.batch.article.config;
+
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import com.codeit.batch.article.domain.Article;
+import com.codeit.batch.article.dto.ArticleCandidate;
+import com.codeit.batch.article.processor.ArticleProcessor;
+import com.codeit.batch.article.reader.OpenApiArticleReader;
+import com.codeit.batch.article.writer.ArticleWriter;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Configuration
+@EnableBatchProcessing
+@RequiredArgsConstructor
+public class ArticleIngestionJobConfig {
+
+	private final JobRepository jobRepository;
+	private final PlatformTransactionManager transactionManager;
+
+	@Bean
+	public Job articleIngestionJob(Step openApiArticleIngestionStep) {
+		return new JobBuilder("articleIngestionJob", jobRepository)
+			.start(openApiArticleIngestionStep)
+			.build();
+	}
+
+	@Bean
+	public Step openApiArticleIngestionStep(
+		OpenApiArticleReader openApiArticleReader,
+		ArticleProcessor articleProcessor,
+		ArticleWriter articleWriter
+	) {
+		return new StepBuilder("openApiArticleIngestionStep", jobRepository)
+			.<ArticleCandidate, Article>chunk(50, transactionManager)
+			.reader(openApiArticleReader)
+			.processor(articleProcessor)
+			.writer(articleWriter)
+			.build();
+	}
+}

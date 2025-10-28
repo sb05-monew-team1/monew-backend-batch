@@ -3,3 +3,22 @@ spring:
     name: monew_batch
   profiles:
     active: dev
+  config:
+    import: optional:file:.env[.properties]
+
+monew:
+  article-ingestion:
+    schedule:
+      cron: ${ARTICLE_JOB_CRON:0 0 * * * *} # 매시간 정각 실행 (환경에 맞게 조정)
+    openapi:
+      base-url: ${NAVER_API_URL:https://openapi.naver.com/v1/search/news.json}
+      api-key: ${NAVER_API_CLIENT_ID}
+      api-secret: ${NAVER_API_CLIENT_SECRET}
+    rss:
+      feeds:
+        - name: hankyung
+          url: ${HANKYUNG_RSS_URL:https://www.hankyung.com/feed/all-news}
+        - name: chosun
+          url: ${CHOSUN_RSS_URL:https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml}
+        - name: yeonhap
+          url: ${YEONHAP_RSS_URL:https://www.yonhapnewstv.co.kr/browse/feed/}
