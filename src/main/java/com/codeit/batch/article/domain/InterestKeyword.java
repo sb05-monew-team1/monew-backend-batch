@@ -1,5 +1,7 @@
 package com.codeit.batch.article.domain;
 
+import com.codeit.batch.common.base.BaseDomain;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

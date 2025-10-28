@@ -3,6 +3,8 @@ package com.codeit.batch.article.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.codeit.batch.common.base.BaseUpdatableDomain;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
