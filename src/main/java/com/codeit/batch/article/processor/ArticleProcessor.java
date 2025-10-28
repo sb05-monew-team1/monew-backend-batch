@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -123,7 +125,10 @@ public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article
 	}
 
 	private String safeString(String value) {
-		return value == null ? "" : value;
+		if (value == null) {
+			return "";
+		}
+		return Jsoup.clean(value, Safelist.none());
 	}
 
 	private boolean attachInterest(Article article, ArticleCandidate candidate) {
