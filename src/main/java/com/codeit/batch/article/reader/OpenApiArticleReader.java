@@ -40,7 +40,7 @@ public class OpenApiArticleReader implements ItemReader<ArticleCandidate> {
 			}
 			String query = buildQuery(currentInterest);
 			NewsResponse response = fetcher
-				.fetch(new OpenApiFetchRequest(query, 50, 1, OpenApiFetchRequest.Sort.SIM));
+				.fetch(new OpenApiFetchRequest(query, 50, 1, OpenApiFetchRequest.Sort.DATE));
 			currentItems = response.items() == null
 				? Collections.emptyIterator()
 				: response.items().iterator();

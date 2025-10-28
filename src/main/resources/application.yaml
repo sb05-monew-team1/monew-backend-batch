@@ -9,11 +9,11 @@ spring:
 monew:
   article-ingestion:
     schedule:
-      cron: ${ARTICLE_JOB_CRON:0 50 * * * *} # 매시간 정각 실행 (환경에 맞게 조정)
+      cron: ${ARTICLE_JOB_CRON:0 0 * * * *} # 매시간 정각 실행 (환경에 맞게 조정)
     openapi:
       base-url: ${NAVER_API_URL:https://openapi.naver.com/v1/search/news.json}
-      api-key: ${CLIENT_ID}
-      api-secret: ${CLIENT_SECRET}
+      api-key: ${NAVER_API_CLIENT_ID}
+      api-secret: ${NAVER_API_CLIENT_SECRET}
     rss:
       feeds:
         - name: hankyung
