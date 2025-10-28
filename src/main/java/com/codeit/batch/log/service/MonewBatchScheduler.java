@@ -1,4 +1,4 @@
-package com.codeit.batch.scheduler;
+package com.codeit.batch.log.service;
 
 import java.time.Instant;
 

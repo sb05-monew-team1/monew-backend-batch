@@ -9,11 +9,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.codeit.batch.article.config.OpenApiProperties;
 import com.codeit.batch.article.config.RssProperties;
+import com.codeit.batch.article.config.ScheduleProperties;
 
 @SpringBootApplication
 @EnableScheduling
 @EnableJpaAuditing
-@EnableConfigurationProperties({OpenApiProperties.class, RssProperties.class})
+@EnableConfigurationProperties({
+	OpenApiProperties.class,
+	RssProperties.class,
+	ScheduleProperties.class})
 public class MonewBatchApplication {
 
     public static void main(String[] args) {
