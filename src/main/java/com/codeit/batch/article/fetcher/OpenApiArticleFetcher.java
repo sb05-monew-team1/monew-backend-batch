@@ -14,8 +14,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.codeit.batch.article.config.OpenApiProperties;
-import com.codeit.batch.article.dto.OpenApiFetchRequest;
 import com.codeit.batch.article.dto.NewsResponse;
+import com.codeit.batch.article.dto.OpenApiFetchRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
