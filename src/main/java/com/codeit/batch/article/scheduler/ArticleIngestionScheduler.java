@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.codeit.batch.article.config.ScheduleProperties;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,9 +22,8 @@ public class ArticleIngestionScheduler {
 
 	private final JobLauncher jobLauncher;
 	private final Job articleIngestionJob;
-	private final ScheduleProperties scheduleProperties;
 
-	@Scheduled(initialDelay = 5000, fixedDelay = 60000)
+	@Scheduled(cron = "${monew.article-ingestion.schedule.cron}", zone = "Asia/Seoul")
 	public void runArticleIngestionJob() {
 		try {
 			JobParameters params = new JobParametersBuilder()

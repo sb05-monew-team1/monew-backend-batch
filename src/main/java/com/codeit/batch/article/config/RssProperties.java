@@ -8,5 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record RssProperties(
 	List<FeedProperty> feeds
 ) {
-	public record FeedProperty(String name, String url) {}
+	public record FeedProperty(String name, String url) {
+	}
 }
