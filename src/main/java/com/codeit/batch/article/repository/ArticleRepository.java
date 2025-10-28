@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.codeit.batch.article.domain.Article;
 
 public interface ArticleRepository extends JpaRepository<Article, UUID> {
-	@EntityGraph(attributePaths = "interests")
+	@EntityGraph(attributePaths = {"articleInterests", "articleInterests.interest"})
 	Optional<Article> findBySourceUrl(String sourceUrl);
 }

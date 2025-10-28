@@ -11,5 +11,5 @@ import com.codeit.batch.article.domain.Interest;
 public interface InterestRepository extends JpaRepository<Interest, UUID> {
 
 	@EntityGraph(attributePaths = "keywords")
-	List<Interest> findAllWithKeywords();
+	List<Interest> findAll();
 }

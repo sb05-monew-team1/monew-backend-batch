@@ -62,7 +62,7 @@ public class OpenApiArticleReader implements ItemReader<ArticleCandidate> {
 
 	private void initIteratorIfNeeded() {
 		if (interestIterator == null) {
-			interestIterator = interestRepository.findAllWithKeywords().iterator();
+			interestIterator = interestRepository.findAll().iterator();
 		}
 	}
 }

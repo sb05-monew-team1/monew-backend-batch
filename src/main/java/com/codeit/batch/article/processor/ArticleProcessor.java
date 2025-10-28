@@ -4,9 +4,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -23,6 +21,7 @@ import com.codeit.batch.article.domain.Interest;
 import com.codeit.batch.article.domain.InterestKeyword;
 import com.codeit.batch.article.dto.ArticleCandidate;
 import com.codeit.batch.article.repository.ArticleRepository;
+import com.codeit.batch.article.repository.InterestRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +34,7 @@ public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME;
 
 	private final ArticleRepository articleRepository;
+	private final InterestRepository interestRepository;
 
 	private final Map<String, Article> cachedArticles = new HashMap<>();
 
@@ -98,7 +98,6 @@ public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article
 			.title(safeString(candidate.newsItem().title()))
 			.summary(safeString(candidate.newsItem().description()))
 			.publishDate(publishDate)
-			.interests(new ArrayList<>())
 			.build();
 	}
 
@@ -128,20 +127,13 @@ public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article
 	}
 
 	private boolean attachInterest(Article article, ArticleCandidate candidate) {
-		List<Interest> interests = article.getInterests();
-		if (interests == null) {
-			log.warn("Article {} returned null interests collection", article.getSourceUrl());
+		if (candidate.interest() == null || candidate.interest().getId() == null) {
+			log.warn("Skip linking interest because candidate has no valid interest information");
 			return false;
 		}
 
-		boolean alreadyLinked = interests
-			.stream()
-			.anyMatch(interest -> interest.getId().equals(candidate.interest().getId()));
+		Interest managedInterest = interestRepository.getReferenceById(candidate.interest().getId());
 
-		if (!alreadyLinked) {
-			interests.add(candidate.interest());
-			return true;
-		}
-		return false;
+		return article.addInterestIfAbsent(managedInterest);
 	}
 }

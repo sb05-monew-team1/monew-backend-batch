@@ -33,4 +33,8 @@ public class Interest extends BaseUpdatableDomain {
 	@Builder.Default
 	@OneToMany(mappedBy = "interest", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<InterestKeyword> keywords = new ArrayList<>();
+
+	@Builder.Default
+	@OneToMany(mappedBy = "interest")
+	private List<ArticleInterest> articleInterests = new ArrayList<>();
 }

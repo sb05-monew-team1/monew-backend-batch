@@ -15,8 +15,6 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -49,11 +47,20 @@ public class Article extends BaseUpdatableDomain {
 	@Column(updatable = false, length = 500)
 	private String summary;
 
-	@OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-	@JoinTable(
-		name = "article_interests",
-		joinColumns = @JoinColumn(name = "article_id"),
-		inverseJoinColumns = @JoinColumn(name = "interest_id")
-	)
-	private List<Interest> interests = new ArrayList<>();
+	@Builder.Default
+	@OneToMany(mappedBy = "article", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+	private List<ArticleInterest> articleInterests = new ArrayList<>();
+
+	public boolean addInterestIfAbsent(Interest interest) {
+		if (interest == null) {
+			return false;
+		}
+		boolean exists = articleInterests.stream()
+			.anyMatch(link -> link.getInterest().getId().equals(interest.getId()));
+		if (exists) {
+			return false;
+		}
+		articleInterests.add(new ArticleInterest(this, interest));
+		return true;
+	}
 }
