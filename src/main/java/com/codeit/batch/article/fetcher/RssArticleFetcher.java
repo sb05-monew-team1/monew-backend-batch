@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestClientException;
 import com.codeit.batch.article.config.RssProperties;
 import com.codeit.batch.article.dto.RssFeedItem;
 import com.codeit.batch.article.dto.RssFeedResponse;
+import com.rometools.rome.feed.synd.SyndContent;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
@@ -58,9 +60,25 @@ public class RssArticleFetcher {
 						? entry.getPublishedDate().toInstant()
 						: null;
 
-					String description = entry.getDescription() != null
-						? clean(entry.getDescription().getValue())
-						: "";
+					String description = Optional.ofNullable(entry.getDescription())
+						.map(SyndContent::getValue)
+						.map(this::clean)
+						.map(String::trim)
+						.orElse("");
+
+					if (!StringUtils.hasText(description) && entry.getContents() != null) {
+						for (SyndContent content : entry.getContents()) {
+							if (content == null || !StringUtils.hasText(content.getValue())) {
+								continue;
+							}
+							String cleaned = clean(content.getValue()).trim();
+							if (StringUtils.hasText(cleaned)) {
+								description = cleaned;
+								break;
+							}
+						}
+					}
+
 
 					if (StringUtils.hasText(description)) {
 						description = description.trim();
