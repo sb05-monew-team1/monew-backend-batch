@@ -1,11 +1,17 @@
 package com.codeit.batch.article.dto;
 
-import com.codeit.batch.article.domain.ArticleSource;
-import com.codeit.batch.article.domain.Interest;
+import java.time.Instant;
 
+import com.codeit.batch.article.domain.ArticleSource;
+
+import lombok.Builder;
+
+@Builder
 public record ArticleCandidate(
-	NewsItem newsItem,
-	Interest interest,
+	String title,
+	String link,
+	String summary,
+	Instant publishedAt,
 	ArticleSource source
 ) {
 }
