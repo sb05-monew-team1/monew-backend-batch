@@ -22,3 +22,14 @@ monew:
           url: ${CHOSUN_RSS_URL:https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml}
         - name: yeonhap
           url: ${YEONHAP_RSS_URL:https://www.yonhapnewstv.co.kr/browse/feed/}
+  article-backup:
+    schedule:
+      cron: ${ARTICLE_BACKUP_CRON:0 10 0 * * *} # 매일 자정 10분 실행
+
+  storage:
+    s3:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+      region: ${AWS_S3_REGION}
+      bucket: ${AWS_S3_BUCKET}
+      expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:600} # (기본값: 10분)
