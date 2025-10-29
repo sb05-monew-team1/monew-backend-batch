@@ -1,10 +1,8 @@
 package com.codeit.batch.article.processor;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -33,26 +31,22 @@ import lombok.RequiredArgsConstructor;
 public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article> {
 
 	private static final Logger log = LoggerFactory.getLogger(ArticleProcessor.class);
-	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME;
 
 	private final ArticleRepository articleRepository;
 	private final InterestRepository interestRepository;
 
 	private final Map<String, Article> cachedArticles = new HashMap<>();
+	private List<Interest> interests;
 
 	@Override
 	public Article process(@NonNull ArticleCandidate candidate) {
-		if (candidate.newsItem() == null || candidate.interest() == null) {
-			return null;
+		if (interests == null) {
+			interests = interestRepository.findAll();
 		}
 
-		if (!containsAllKeywords(candidate)) {
-			return null;
-		}
-
-		String sourceUrl = resolveSourceUrl(candidate);
+		String sourceUrl = candidate.link();
 		if (!StringUtils.hasText(sourceUrl)) {
-			log.debug("Skip article without a usable source url for interest {}", candidate.interest().getId());
+			log.debug("Skip article without a usable source url");
 			return null;
 		}
 
@@ -64,32 +58,42 @@ public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article
 			if (article == null) {
 				return null;
 			}
-
-			boolean added = attachInterest(article, candidate);
 			cachedArticles.put(sourceUrl, article);
-			return added ? article : null;
+			cached = article;
 		}
+		boolean added = false;
 
-		boolean added = attachInterest(cached, candidate);
+		for (Interest interest : interests) {
+			if (interest.getKeywords() == null || interest.getKeywords().isEmpty()) {
+				continue;
+			}
+			if (containsAllKeywords(cached, interest)) {
+				added |= attachInterest(cached, interest);
+			}
+		}
 		return added ? cached : null;
 	}
 
-	private boolean containsAllKeywords(ArticleCandidate candidate) {
-		String title = safeString(candidate.newsItem().title());
-		String description = safeString(candidate.newsItem().description());
+	private boolean containsAllKeywords(Article article, Interest interest) {
+		String title = safeString(article.getTitle());
+		String description = safeString(article.getSummary());
 		String combined = (title + " " + description).toLowerCase(Locale.ROOT);
 
-		return candidate.interest()
-			.getKeywords()
-			.stream()
+		List<String> keywords = interest.getKeywords().stream()
 			.map(InterestKeyword::getKeyword)
 			.filter(StringUtils::hasText)
-			.map(keyword -> keyword.trim().toLowerCase(Locale.ROOT))
-			.allMatch(combined::contains);
+			.map(k -> k.trim().toLowerCase(Locale.ROOT))
+			.toList();
+
+		if (keywords.isEmpty()) {
+			return false;
+		}
+
+		return keywords.stream().allMatch(combined::contains);
 	}
 
 	private Article buildArticle(ArticleCandidate candidate, String sourceUrl) {
-		Instant publishDate = resolvePublishDate(candidate);
+		Instant publishDate = candidate.publishedAt();
 		if (publishDate == null) {
 			return null;
 		}
@@ -97,31 +101,10 @@ public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article
 		return Article.builder()
 			.source(candidate.source())
 			.sourceUrl(sourceUrl)
-			.title(safeString(candidate.newsItem().title()))
-			.summary(safeString(candidate.newsItem().description()))
+			.title(safeString(candidate.title()))
+			.summary(safeString(candidate.summary()))
 			.publishDate(publishDate)
 			.build();
-	}
-
-	private Instant resolvePublishDate(ArticleCandidate candidate) {
-		String raw = candidate.newsItem().publishedAt();
-		if (!StringUtils.hasText(raw)) {
-			return null;
-		}
-		try {
-			return ZonedDateTime.parse(raw, DATE_FORMATTER).toInstant();
-		} catch (DateTimeParseException ex) {
-			log.warn("Failed to parse publish date '{}' for interest {}", raw, candidate.interest().getId(), ex);
-			return null;
-		}
-	}
-
-	private String resolveSourceUrl(ArticleCandidate candidate) {
-		String originalLink = candidate.newsItem().originalLink();
-		if (StringUtils.hasText(originalLink)) {
-			return originalLink;
-		}
-		return candidate.newsItem().link();
 	}
 
 	private String safeString(String value) {
@@ -131,13 +114,13 @@ public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article
 		return Jsoup.clean(value, Safelist.none());
 	}
 
-	private boolean attachInterest(Article article, ArticleCandidate candidate) {
-		if (candidate.interest() == null || candidate.interest().getId() == null) {
+	private boolean attachInterest(Article article, Interest interest) {
+		if (interest == null || interest.getId() == null) {
 			log.warn("Skip linking interest because candidate has no valid interest information");
 			return false;
 		}
 
-		Interest managedInterest = interestRepository.getReferenceById(candidate.interest().getId());
+		Interest managedInterest = interestRepository.getReferenceById(interest.getId());
 
 		return article.addInterestIfAbsent(managedInterest);
 	}

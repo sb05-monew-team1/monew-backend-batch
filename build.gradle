@@ -57,6 +57,9 @@ dependencies {
 
     // Jsoup
     implementation 'org.jsoup:jsoup:1.21.2'
+
+    // Rome
+    implementation 'com.rometools:rome:2.1.0'
 }
 
 tasks.named('test') {
