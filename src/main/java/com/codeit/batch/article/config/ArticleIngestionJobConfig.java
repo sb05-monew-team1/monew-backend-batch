@@ -14,6 +14,7 @@ import com.codeit.batch.article.domain.Article;
 import com.codeit.batch.article.dto.ArticleCandidate;
 import com.codeit.batch.article.processor.ArticleProcessor;
 import com.codeit.batch.article.reader.OpenApiArticleReader;
+import com.codeit.batch.article.reader.RssArticleReader;
 import com.codeit.batch.article.writer.ArticleWriter;
 
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,13 @@ public class ArticleIngestionJobConfig {
 	private final PlatformTransactionManager transactionManager;
 
 	@Bean
-	public Job articleIngestionJob(Step openApiArticleIngestionStep) {
+	public Job articleIngestionJob(
+		Step openApiArticleIngestionStep,
+		Step rssArticleIngestionStep
+		) {
 		return new JobBuilder("articleIngestionJob", jobRepository)
 			.start(openApiArticleIngestionStep)
+			.next(rssArticleIngestionStep)
 			.build();
 	}
 
@@ -44,6 +49,20 @@ public class ArticleIngestionJobConfig {
 		return new StepBuilder("openApiArticleIngestionStep", jobRepository)
 			.<ArticleCandidate, Article>chunk(50, transactionManager)
 			.reader(openApiArticleReader)
+			.processor(articleProcessor)
+			.writer(articleWriter)
+			.build();
+	}
+
+	@Bean
+	public Step rssArticleIngestionStep(
+		RssArticleReader rssArticleReader,
+		ArticleProcessor articleProcessor,
+		ArticleWriter articleWriter
+	) {
+		return new StepBuilder("rssArticleIngestionStep", jobRepository)
+			.<ArticleCandidate, Article>chunk(50, transactionManager)
+			.reader(rssArticleReader)
 			.processor(articleProcessor)
 			.writer(articleWriter)
 			.build();
