@@ -47,9 +47,17 @@ public class Article extends BaseUpdatableDomain {
 	@Column(updatable = false, length = 500)
 	private String summary;
 
+	private long commentCount;
+
+	private long viewCount;
+
 	@Builder.Default
 	@OneToMany(mappedBy = "article", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
 	private List<ArticleInterest> articleInterests = new ArrayList<>();
+
+	private Instant collectedAt;
+
+	private Instant deletedAt;
 
 	public boolean addInterestIfAbsent(Interest interest) {
 		if (interest == null) {
