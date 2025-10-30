@@ -12,6 +12,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import com.codeit.batch.article.storage.S3BackupStorage;
@@ -31,7 +32,7 @@ public class ArticleBackupWriter implements ItemStreamWriter<String> {
 	private String backupDate;
 
 	@Override
-	public void open(ExecutionContext executionContext) {
+	public void open(@NonNull ExecutionContext executionContext) {
 		out = new ByteArrayOutputStream(1024 * 1024);
 		writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
 	}

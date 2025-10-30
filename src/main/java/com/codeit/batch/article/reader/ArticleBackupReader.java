@@ -11,6 +11,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -74,18 +75,12 @@ public class ArticleBackupReader implements ItemStreamReader<Article> {
 	}
 
 	@Override
-	public void open(ExecutionContext executionContext) {
-		if (executionContext == null) {
-			return;
-		}
+	public void open(@NonNull ExecutionContext executionContext) {
 		offset = executionContext.getLong(OFFSET_KEY, offset);
 	}
 
 	@Override
-	public void update(ExecutionContext executionContext) {
-		if (executionContext == null) {
-			return;
-		}
+	public void update(@NonNull ExecutionContext executionContext) {
 		executionContext.putLong(OFFSET_KEY, offset);
 	}
 

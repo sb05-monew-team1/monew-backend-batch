@@ -2,6 +2,7 @@ package com.codeit.batch.article.processor;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import com.codeit.batch.article.domain.Article;
@@ -28,7 +29,7 @@ public class ArticleBackupProcessor implements ItemProcessor<Article, String> {
 	}
 
 	@Override
-	public String process(Article item) throws Exception {
+	public String process(@NonNull Article item) throws Exception {
 		ArticleBackupDto dto = mapper.toDto(item);
 		return jsonWriter.writeValueAsString(dto);
 	}
