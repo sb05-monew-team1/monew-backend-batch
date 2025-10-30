@@ -51,7 +51,9 @@ public class S3BackupStorage {
 		try {
 			s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file));
 		} catch (Exception e) {
-			throw new RuntimeException(e); // TODO: 커스텀 예외 추가
+			log.error("Failed to upload article backup to S3 bucket={} key={}", bucket, key, e);
+			throw new BackupStorageException(
+				String.format("Failed to upload article backup to S3 (bucket=%s, key=%s)", bucket, key), e);
 		}
 
 	}

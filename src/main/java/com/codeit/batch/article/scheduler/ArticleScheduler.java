@@ -61,7 +61,9 @@ public class ArticleScheduler {
 			log.info("[Scheduler] 기사 백업 배치 실행 id={}, status={}",
 				execution.getJobId(), execution.getStatus());
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			log.error("[Scheduler] 기사 백업 배치 실행 실패: from={} to={} backupDate={}",
+				from, to, targetDate, e);
+			throw new IllegalStateException("기사 백업 배치 실행에 실패했습니다.", e);
 		}
 
 	}
