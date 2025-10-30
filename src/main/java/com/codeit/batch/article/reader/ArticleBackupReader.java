@@ -51,7 +51,7 @@ public class ArticleBackupReader implements ItemStreamReader<Article> {
 		this.queryFactory = queryFactory;
 		this.from = parseInstant(fromParam, null);
 		this.to = parseInstant(toParam, null);
-		this.pageSize = resolvePageSize(Integer.parseInt(pageSizeParam));
+		this.pageSize = resolvePageSize(pageSizeParam);
 		log.debug("ArticleBackupReader initialized from={} to={} pageSize={}", from, to, this.pageSize);
 	}
 
@@ -120,11 +120,19 @@ public class ArticleBackupReader implements ItemStreamReader<Article> {
 		return predicate;
 	}
 
-	private int resolvePageSize(Integer pageSizeParam) {
-		if (pageSizeParam == null || pageSizeParam <= 0) {
+	private int resolvePageSize(String pageSizeParam) {
+		if (pageSizeParam == null || pageSizeParam.isBlank()) {
 			return DEFAULT_PAGE_SIZE;
 		}
-		return pageSizeParam;
+		try {
+			int pageSize = Integer.parseInt(pageSizeParam.trim());
+			if (pageSize <= 0) {
+				return DEFAULT_PAGE_SIZE;
+			}
+			return pageSize;
+		} catch (NumberFormatException ex) {
+			return DEFAULT_PAGE_SIZE;
+		}
 	}
 
 	private Instant parseInstant(String raw, Instant defaultValue) {
@@ -139,4 +147,3 @@ public class ArticleBackupReader implements ItemStreamReader<Article> {
 		}
 	}
 }
-
