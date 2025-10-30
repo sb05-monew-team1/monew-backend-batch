@@ -83,6 +83,10 @@ public class RssArticleFetcher {
 						description = description.trim();
 					}
 
+					if (description.length() >= 400) {
+						description = description.substring(0, 400);
+					}
+
 					return new RssFeedItem(
 						entry.getTitle(),
 						StringUtils.hasText(entry.getLink()) ? entry.getLink() : entry.getUri(),
