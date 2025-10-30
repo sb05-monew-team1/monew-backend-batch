@@ -79,7 +79,6 @@ public class RssArticleFetcher {
 						}
 					}
 
-
 					if (StringUtils.hasText(description)) {
 						description = description.trim();
 					}

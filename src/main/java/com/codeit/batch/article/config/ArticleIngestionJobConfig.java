@@ -33,7 +33,7 @@ public class ArticleIngestionJobConfig {
 	public Job articleIngestionJob(
 		Step openApiArticleIngestionStep,
 		Step rssArticleIngestionStep
-		) {
+	) {
 		return new JobBuilder("articleIngestionJob", jobRepository)
 			.start(openApiArticleIngestionStep)
 			.next(rssArticleIngestionStep)

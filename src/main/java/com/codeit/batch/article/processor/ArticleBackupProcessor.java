@@ -27,7 +27,6 @@ public class ArticleBackupProcessor implements ItemProcessor<Article, String> {
 		this.jsonWriter = objectMapper.writer();
 	}
 
-
 	@Override
 	public String process(Article item) throws Exception {
 		ArticleBackupDto dto = mapper.toDto(item);
