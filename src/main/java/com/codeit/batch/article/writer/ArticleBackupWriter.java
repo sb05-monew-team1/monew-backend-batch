@@ -1,10 +1,11 @@
 package com.codeit.batch.article.writer;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.Chunk;
@@ -23,18 +24,38 @@ import lombok.RequiredArgsConstructor;
 @StepScope
 @RequiredArgsConstructor
 public class ArticleBackupWriter implements ItemStreamWriter<String> {
+	private static final String TEMP_FILE_KEY = "articleBackupWriter.tempFile";
+	private static final String SIZE_KEY = "articleBackupWriter.size";
+
 	private final S3BackupStorage storage;
 
-	private ByteArrayOutputStream out;
 	private BufferedWriter writer;
+	private Path tempFile;
 
 	@Value("#{jobParameters['backupDate']}")
 	private String backupDate;
 
 	@Override
-	public void open(@NonNull ExecutionContext executionContext) {
-		out = new ByteArrayOutputStream(1024 * 1024);
-		writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+	public void open(@NonNull ExecutionContext context) throws ItemStreamException {
+		boolean hasSavedPath = context.containsKey(TEMP_FILE_KEY);
+		try {
+			if (hasSavedPath) {
+				String savedPath = context.getString(TEMP_FILE_KEY);
+				tempFile = Path.of(savedPath);
+				if (Files.exists(tempFile)) {
+					writer = Files.newBufferedWriter(tempFile, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+				} else {
+					tempFile = Files.createTempFile("article-backup-", ".jsonl");
+					writer = Files.newBufferedWriter(tempFile, StandardCharsets.UTF_8);
+				}
+			} else {
+				tempFile = Files.createTempFile("article-backup-", ".jsonl");
+				writer = Files.newBufferedWriter(tempFile, StandardCharsets.UTF_8);
+			}
+
+		} catch (IOException e) {
+			throw new ItemStreamException("임시 파일을 열 수 없습니다", e);
+		}
 	}
 
 	@Override
@@ -43,11 +64,20 @@ public class ArticleBackupWriter implements ItemStreamWriter<String> {
 			writer.write(jsonLine);
 			writer.newLine();
 		}
+		writer.flush();
 	}
 
 	@Override
-	public void update(ExecutionContext executionContext) throws ItemStreamException {
-		executionContext.putLong("articleBackupWriter.size", out.size());
+	public void update(@NonNull ExecutionContext context) throws ItemStreamException {
+		if (tempFile == null) {
+			return;
+		}
+		context.putString(TEMP_FILE_KEY, tempFile.toString());
+		try {
+			context.putLong(SIZE_KEY, Files.size(tempFile));
+		} catch (IOException e) {
+			throw new ItemStreamException("임시 파일 크기를 확인할 수 없습니다", e);
+		}
 	}
 
 	@Override
@@ -56,13 +86,13 @@ public class ArticleBackupWriter implements ItemStreamWriter<String> {
 			return;
 		}
 		try {
-			writer.flush();
 			writer.close();
+			byte[] payload = Files.readAllBytes(tempFile);
+			storage.backup(backupDate, payload);
+			Files.deleteIfExists(tempFile);
+			tempFile = null;
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new ItemStreamException("백업 파일 처리 중 오류", e);
 		}
-
-		byte[] payload = out.toByteArray();
-		storage.backup(backupDate, payload);
 	}
 }
