@@ -114,6 +114,7 @@ public class ArticleProcessor implements ItemProcessor<ArticleCandidate, Article
 			.title(safeString(candidate.title()))
 			.summary(safeString(candidate.summary()))
 			.publishDate(publishDate)
+			.collectedAt(Instant.now())
 			.build();
 	}
 
