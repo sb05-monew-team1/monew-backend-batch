@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import com.codeit.batch.article.config.AwsProperties;
 import com.codeit.batch.article.config.OpenApiProperties;
 import com.codeit.batch.article.config.RssProperties;
 
@@ -14,7 +15,8 @@ import com.codeit.batch.article.config.RssProperties;
 @EnableJpaAuditing
 @EnableConfigurationProperties({
 	OpenApiProperties.class,
-	RssProperties.class})
+	RssProperties.class,
+	AwsProperties.class})
 public class MonewBatchApplication {
 
 	public static void main(String[] args) {

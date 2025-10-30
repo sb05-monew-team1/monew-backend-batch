@@ -60,6 +60,9 @@ dependencies {
 
     // Rome
     implementation 'com.rometools:rome:2.1.0'
+
+    // aws
+    implementation 'software.amazon.awssdk:s3:2.31.7'
 }
 
 tasks.named('test') {

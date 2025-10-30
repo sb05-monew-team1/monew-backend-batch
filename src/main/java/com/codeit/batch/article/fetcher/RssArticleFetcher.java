@@ -79,9 +79,12 @@ public class RssArticleFetcher {
 						}
 					}
 
-
 					if (StringUtils.hasText(description)) {
 						description = description.trim();
+					}
+
+					if (description.length() >= 400) {
+						description = description.substring(0, 400);
 					}
 
 					return new RssFeedItem(
