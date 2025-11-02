@@ -7,8 +7,24 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     open-in-view: false
     properties:
       hibernate:
-        format_sql: false
+        default_schema: app
+
+  batch:
+    jdbc:
+      initialize-schema: always
+      table-prefix: batch_meta.BATCH_
+    job:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.jdbc.datasource.init: info
+
+    # SQL
+    org.hibernate.sql: info # 실행된 SQL
+    org.hibernate.orm.jdbc.bind: info # 바인딩 파라미터
+    root: info
