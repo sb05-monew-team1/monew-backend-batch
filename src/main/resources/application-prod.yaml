@@ -4,6 +4,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      connection-init-sql: SET search_path TO batch_meta, app, public
 
   jpa:
     hibernate:
