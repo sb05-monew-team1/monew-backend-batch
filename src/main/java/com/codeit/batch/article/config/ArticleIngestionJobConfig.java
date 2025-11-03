@@ -1,7 +1,9 @@
 package com.codeit.batch.article.config;
 
+import org.springframework.batch.core.ItemWriteListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -12,6 +14,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.codeit.batch.article.domain.Article;
 import com.codeit.batch.article.dto.ArticleCandidate;
+import com.codeit.batch.article.listener.ArticleInterestAggregationListener;
+import com.codeit.batch.article.listener.InterestNotificationPublisher;
 import com.codeit.batch.article.processor.ArticleProcessor;
 import com.codeit.batch.article.reader.OpenApiArticleReader;
 import com.codeit.batch.article.reader.RssArticleReader;
@@ -44,13 +48,18 @@ public class ArticleIngestionJobConfig {
 	public Step openApiArticleIngestionStep(
 		OpenApiArticleReader openApiArticleReader,
 		ArticleProcessor articleProcessor,
-		ArticleWriter articleWriter
+		ArticleWriter articleWriter,
+		ArticleInterestAggregationListener articleInterestAggregationListener,
+		InterestNotificationPublisher interestNotificationPublisher
 	) {
 		return new StepBuilder("openApiArticleIngestionStep", jobRepository)
 			.<ArticleCandidate, Article>chunk(50, transactionManager)
 			.reader(openApiArticleReader)
 			.processor(articleProcessor)
 			.writer(articleWriter)
+			.listener((ItemWriteListener<? super Article>)articleInterestAggregationListener)
+			.listener((StepExecutionListener)articleInterestAggregationListener)
+			.listener(interestNotificationPublisher)
 			.build();
 	}
 
@@ -58,13 +67,18 @@ public class ArticleIngestionJobConfig {
 	public Step rssArticleIngestionStep(
 		RssArticleReader rssArticleReader,
 		ArticleProcessor articleProcessor,
-		ArticleWriter articleWriter
+		ArticleWriter articleWriter,
+		ArticleInterestAggregationListener articleInterestAggregationListener,
+		InterestNotificationPublisher interestNotificationPublisher
 	) {
 		return new StepBuilder("rssArticleIngestionStep", jobRepository)
 			.<ArticleCandidate, Article>chunk(50, transactionManager)
 			.reader(rssArticleReader)
 			.processor(articleProcessor)
 			.writer(articleWriter)
+			.listener((ItemWriteListener<? super Article>)articleInterestAggregationListener)
+			.listener((StepExecutionListener)articleInterestAggregationListener)
+			.listener(interestNotificationPublisher)
 			.build();
 	}
 }
