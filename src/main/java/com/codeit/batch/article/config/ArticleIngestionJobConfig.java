@@ -36,9 +36,11 @@ public class ArticleIngestionJobConfig {
 	@Bean
 	public Job articleIngestionJob(
 		Step openApiArticleIngestionStep,
-		Step rssArticleIngestionStep
+		Step rssArticleIngestionStep,
+		InterestNotificationPublisher interestNotificationPublisher
 	) {
 		return new JobBuilder("articleIngestionJob", jobRepository)
+			.listener(interestNotificationPublisher)
 			.start(openApiArticleIngestionStep)
 			.next(rssArticleIngestionStep)
 			.build();
@@ -49,8 +51,7 @@ public class ArticleIngestionJobConfig {
 		OpenApiArticleReader openApiArticleReader,
 		ArticleProcessor articleProcessor,
 		ArticleWriter articleWriter,
-		ArticleInterestAggregationListener articleInterestAggregationListener,
-		InterestNotificationPublisher interestNotificationPublisher
+		ArticleInterestAggregationListener articleInterestAggregationListener
 	) {
 		return new StepBuilder("openApiArticleIngestionStep", jobRepository)
 			.<ArticleCandidate, Article>chunk(50, transactionManager)
@@ -59,7 +60,6 @@ public class ArticleIngestionJobConfig {
 			.writer(articleWriter)
 			.listener((ItemWriteListener<? super Article>)articleInterestAggregationListener)
 			.listener((StepExecutionListener)articleInterestAggregationListener)
-			.listener(interestNotificationPublisher)
 			.build();
 	}
 
@@ -68,8 +68,7 @@ public class ArticleIngestionJobConfig {
 		RssArticleReader rssArticleReader,
 		ArticleProcessor articleProcessor,
 		ArticleWriter articleWriter,
-		ArticleInterestAggregationListener articleInterestAggregationListener,
-		InterestNotificationPublisher interestNotificationPublisher
+		ArticleInterestAggregationListener articleInterestAggregationListener
 	) {
 		return new StepBuilder("rssArticleIngestionStep", jobRepository)
 			.<ArticleCandidate, Article>chunk(50, transactionManager)
@@ -78,7 +77,6 @@ public class ArticleIngestionJobConfig {
 			.writer(articleWriter)
 			.listener((ItemWriteListener<? super Article>)articleInterestAggregationListener)
 			.listener((StepExecutionListener)articleInterestAggregationListener)
-			.listener(interestNotificationPublisher)
 			.build();
 	}
 }

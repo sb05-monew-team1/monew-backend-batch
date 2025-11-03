@@ -21,13 +21,14 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * {@link Article} 청크를 쓰는 과정에서 새롭게 연결된 관심사 수를 누적해 유지하는 리스너.
- * {@link ArticleInterest} 의 ID 는 persist 전까지 비어 있으므로 해당 특성을 활용한다.
+ * 각 청크에서 새로 연결된 관심사 ID 를 누적해 JobExecutionContext 로 전달하는 리스너.
  */
 @Slf4j
 @Component
 @StepScope
 public class ArticleInterestAggregationListener implements ItemWriteListener<Article>, StepExecutionListener {
+
+	public static final String CONTEXT_KEY = "interestArticleCount";
 
 	@Getter
 	private final Map<UUID, Integer> interestArticleCount = new HashMap<>();
@@ -62,6 +63,22 @@ public class ArticleInterestAggregationListener implements ItemWriteListener<Art
 
 	@Override
 	public ExitStatus afterStep(StepExecution stepExecution) {
+		if (!interestArticleCount.isEmpty()) {
+			@SuppressWarnings("unchecked")
+			Map<UUID, Integer> jobCounts = (Map<UUID, Integer>)stepExecution.getJobExecution()
+				.getExecutionContext()
+				.get(CONTEXT_KEY);
+			if (jobCounts == null) {
+				jobCounts = new HashMap<>();
+			}
+
+			for (Map.Entry<UUID, Integer> entry : interestArticleCount.entrySet()) {
+				jobCounts.merge(entry.getKey(), entry.getValue(), Integer::sum);
+			}
+
+			stepExecution.getJobExecution().getExecutionContext().put(CONTEXT_KEY, jobCounts);
+			interestArticleCount.clear();
+		}
 		return ExitStatus.COMPLETED;
 	}
 
@@ -75,3 +92,4 @@ public class ArticleInterestAggregationListener implements ItemWriteListener<Art
 		// no-op
 	}
 }
+

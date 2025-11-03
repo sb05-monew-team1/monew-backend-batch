@@ -1,14 +1,13 @@
 package com.codeit.batch.article.listener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 import com.codeit.batch.article.domain.Interest;
@@ -23,23 +22,31 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class InterestNotificationPublisher implements StepExecutionListener {
+public class InterestNotificationPublisher implements JobExecutionListener {
 
 	private final InterestSubscriptionRepository interestSubscriptionRepository;
 	private final NotificationRepository notificationRepository;
 	private final InterestRepository interestRepository;
-	private final ArticleInterestAggregationListener aggregationListener;
 
 	private static final String RESOURCE_TYPE = "INTEREST";
 
 	@Override
-	public ExitStatus afterStep(StepExecution stepExecution) {
-		Map<UUID, Integer> counts = new HashMap<>(aggregationListener.getInterestArticleCount());
-		if (counts.isEmpty()) {
-			return ExitStatus.COMPLETED;
+	public void beforeJob(JobExecution jobExecution) {
+		// no-op
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void afterJob(JobExecution jobExecution) {
+		ExecutionContext jobContext = jobExecution.getExecutionContext();
+		Map<UUID, Integer> counts =
+			(Map<UUID, Integer>)jobContext.remove(ArticleInterestAggregationListener.CONTEXT_KEY);
+		if (counts == null || counts.isEmpty()) {
+			return;
 		}
 
-		for (UUID uuid : counts.keySet()) {
+		for (Map.Entry<UUID, Integer> entry : counts.entrySet()) {
+			UUID uuid = entry.getKey();
 			List<Notification> notifications = new ArrayList<>();
 			Interest interest = interestRepository.findById(uuid).orElse(null);
 			if (interest == null) {
@@ -54,8 +61,7 @@ public class InterestNotificationPublisher implements StepExecutionListener {
 				continue;
 			}
 
-			int count = counts.get(uuid);
-
+			int count = entry.getValue();
 			if (count == 0) {
 				continue;
 			}
@@ -72,9 +78,5 @@ public class InterestNotificationPublisher implements StepExecutionListener {
 			}
 			notificationRepository.saveAll(notifications);
 		}
-
-		aggregationListener.getInterestArticleCount().clear();
-
-		return ExitStatus.COMPLETED;
 	}
 }
