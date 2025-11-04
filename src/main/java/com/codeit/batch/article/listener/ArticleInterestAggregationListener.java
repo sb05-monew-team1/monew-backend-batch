@@ -79,7 +79,7 @@ public class ArticleInterestAggregationListener implements ItemWriteListener<Art
 			stepExecution.getJobExecution().getExecutionContext().put(CONTEXT_KEY, jobCounts);
 			interestArticleCount.clear();
 		}
-		return ExitStatus.COMPLETED;
+		return stepExecution.getExitStatus();
 	}
 
 	@Override
@@ -92,4 +92,3 @@ public class ArticleInterestAggregationListener implements ItemWriteListener<Art
 		// no-op
 	}
 }
-

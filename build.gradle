@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-cloudwatch2'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'
@@ -63,6 +64,7 @@ dependencies {
 
     // aws
     implementation 'software.amazon.awssdk:s3:2.31.7'
+    implementation 'software.amazon.awssdk:cloudwatch:2.31.7'
 }
 
 tasks.named('test') {
