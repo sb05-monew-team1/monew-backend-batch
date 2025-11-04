@@ -33,3 +33,19 @@ monew:
       region: ${AWS_S3_REGION}
       bucket: ${AWS_S3_BUCKET}
       expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:600} # (기본값: 10분)
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      cloudwatch:
+        enabled: ${CLOUDWATCH_METRICS_ENABLED:false}
+        namespace: ${CLOUDWATCH_NAMESPACE:monew/batch}
+        step: ${CLOUDWATCH_EXPORT_STEP:1m}
+        batchSize: ${CLOUDWATCH_EXPORT_BATCH_SIZE:20}
+        region: ${CLOUDWATCH_REGION:}

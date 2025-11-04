@@ -14,6 +14,7 @@ import com.codeit.batch.article.domain.Article;
 import com.codeit.batch.article.processor.ArticleBackupProcessor;
 import com.codeit.batch.article.reader.ArticleBackupReader;
 import com.codeit.batch.article.writer.ArticleBackupWriter;
+import com.codeit.batch.common.metrics.BatchJobMetricsListener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +26,14 @@ import lombok.extern.slf4j.Slf4j;
 public class ArticleBackupJobConfig {
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager transactionManager;
+	private final BatchJobMetricsListener batchJobMetricsListener;
 
 	@Bean
 	public Job articleBackupJob(
 		Step articleBackupStep
 	) {
 		return new JobBuilder("articleBackupJob", jobRepository)
+			.listener(batchJobMetricsListener)
 			.start(articleBackupStep)
 			.build();
 	}

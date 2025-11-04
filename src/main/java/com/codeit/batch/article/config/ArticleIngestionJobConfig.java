@@ -20,6 +20,7 @@ import com.codeit.batch.article.processor.ArticleProcessor;
 import com.codeit.batch.article.reader.OpenApiArticleReader;
 import com.codeit.batch.article.reader.RssArticleReader;
 import com.codeit.batch.article.writer.ArticleWriter;
+import com.codeit.batch.common.metrics.BatchJobMetricsListener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class ArticleIngestionJobConfig {
 
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager transactionManager;
+	private final BatchJobMetricsListener batchJobMetricsListener;
 
 	@Bean
 	public Job articleIngestionJob(
@@ -40,6 +42,7 @@ public class ArticleIngestionJobConfig {
 		InterestNotificationPublisher interestNotificationPublisher
 	) {
 		return new JobBuilder("articleIngestionJob", jobRepository)
+			.listener(batchJobMetricsListener)
 			.listener(interestNotificationPublisher)
 			.start(openApiArticleIngestionStep)
 			.next(rssArticleIngestionStep)
