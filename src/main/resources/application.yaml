@@ -38,7 +38,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,beans,configprops
   metrics:
     tags:
       application: ${spring.application.name}
