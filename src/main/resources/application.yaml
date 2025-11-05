@@ -38,13 +38,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,beans,configprops
+        include: health,info,metrics
   metrics:
     tags:
       application: ${spring.application.name}
     export:
       cloudwatch:
-        enabled: ${CLOUDWATCH_METRICS_ENABLED:true}
+        enabled: ${CLOUDWATCH_METRICS_ENABLED:false}
         namespace: ${CLOUDWATCH_NAMESPACE:monew/batch}
         step: ${CLOUDWATCH_EXPORT_STEP:1m}
         batchSize: ${CLOUDWATCH_EXPORT_BATCH_SIZE:20}
