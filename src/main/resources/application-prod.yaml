@@ -6,6 +6,10 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD}
     hikari:
       connection-init-sql: SET search_path TO batch_meta, app, public
+      max-lifetime: 240000   # 240초
+      idle-timeout: 180000   # 180초
+      keepalive-time: 90000  # 90초마다 keepalive
+      validation-timeout: 5000
 
   jpa:
     hibernate:
