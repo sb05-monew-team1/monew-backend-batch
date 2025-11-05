@@ -94,6 +94,6 @@ CREATE SEQUENCE batch_meta.batch_step_execution_seq START WITH 1 MINVALUE 1;
 CREATE SEQUENCE batch_meta.batch_job_execution_seq START WITH 1 MINVALUE 1;
 CREATE SEQUENCE batch_meta.batch_job_seq START WITH 1 MINVALUE 1;
 
-SELECT setval('batch_meta.batch_step_execution_seq', 0, false);
-SELECT setval('batch_meta.batch_job_execution_seq', 0, false);
-SELECT setval('batch_meta.batch_job_seq', 0, false);
+SELECT setval('batch_meta.batch_step_execution_seq', 1, false);
+SELECT setval('batch_meta.batch_job_execution_seq', 1, false);
+SELECT setval('batch_meta.batch_job_seq', 1, false);
